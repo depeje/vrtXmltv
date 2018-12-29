@@ -68,7 +68,7 @@ class Xml:
         tree.write(sys.stdout.buffer)
 
 if __name__ == '__main__':
-    sys.stdout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE tv SYSTEM \"xmltv.dtd\">\n\n")
+    print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE tv SYSTEM \"xmltv.dtd\">\n", flush=True)
     now = datetime.now()
     xmlDoc = Xml()
     nowSeconds = now.year*10000000000 + now.month*100000000 + now.day*1000000
