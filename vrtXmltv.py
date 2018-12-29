@@ -71,14 +71,12 @@ if __name__ == '__main__':
     print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE tv SYSTEM \"xmltv.dtd\">\n", flush=True)
     now = datetime.now()
     xmlDoc = Xml()
-    nowSeconds = now.year*10000000000 + now.month*100000000 + now.day*1000000
 
     vrts = Vrtnu(now, 0), Vrtnu(now, 1), Vrtnu(now, 2), Vrtnu(now, 3), Vrtnu(now, 4), Vrtnu(now, 5), Vrtnu(now, 6)
 
     for channel in "xmltv.canvas", "xmltv.een", "xmltv.ketnet":
         for advance in 1, 2, 3, 4, 5, 6:
             if vrts[advance].inited == True:
-                programDayAdder = advance * 1000000
                 timeTable = vrts[advance].getListForChannel(channel)
                 lastStartInDay = 0
                 lastStop = 0
@@ -89,13 +87,24 @@ if __name__ == '__main__':
                     stopInDay = int(program.get("end").replace(":",""))*100
 
                     if startInDay < lastStartInDay:
-                        startDayAdder = 1000000
+                        startDayAdder = 1
 
                     if stopInDay < startInDay:
-                        stopDayAdder = 1000000
+                        stopDayAdder = 1
 
-                    start = nowSeconds + programDayAdder + startInDay + startDayAdder
-                    stop = nowSeconds + programDayAdder + stopInDay + startDayAdder + stopDayAdder
+                    startTime = now + timedelta(days=(advance + startDayAdder))
+                    startDaySeconds = startTime.year * 10000000000 \
+                                      + startTime.month * 100000000 \
+                                      + startTime.day * 1000000
+                    start = startDaySeconds + startInDay
+
+                    stopTime = startTime + timedelta(days=stopDayAdder)
+                    stopDaySeconds = stopTime.year * 10000000000 \
+                                      + stopTime.month * 100000000 \
+                                      + stopTime.day * 1000000
+                    stop = stopDaySeconds + stopInDay
+
+                    # VRT NU sometimes has overlapping programs, which mythtv can't handle.
                     if start < lastStop:
                         start = lastStop
                     lastStop = stop
