@@ -106,4 +106,10 @@ if __name__ == '__main__':
                                         channel,
                                         program.get("title"))
 
+            else:
+                if advance == 1:
+                    exit(1)
+
     xmlDoc.output()
+    sys.stdout.write("\n")
+    exit(0)
