@@ -5,7 +5,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if $DIR/vrtXmltv.py > vrt_epg.xml; then
+if $DIR/vrtXmltv.py > vrt_epg.xml ; then
     echo "Downloaded successfully. Updating MythTV"
     /usr/bin/mythfilldatabase --only-update-guide --sourceid 1 --file --xmlfile vrt_epg.xml
 else
