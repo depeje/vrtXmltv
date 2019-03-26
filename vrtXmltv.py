@@ -60,8 +60,8 @@ class Xml:
 
     def addProgramme(self, start, stop, channel, title):
         programme = ET.SubElement(self.root, "programme")
-        programme.set("start", str(start).zfill(14) + " +0100")
-        programme.set("stop", str(stop).zfill(14) + " +0100")
+        programme.set("start", start)
+        programme.set("stop", stop)
         programme.set("channel", channel)
 
         ET.SubElement(programme, "title", lang="nl").text = title
@@ -80,40 +80,17 @@ if __name__ == '__main__':
     while vrt.inited == True:
         for channel in "xmltv.canvas", "xmltv.een", "xmltv.ketnet":
             timeTable = vrt.getListForChannel(channel)
-            lastStartInDay = 0
             lastStop = 0
-            startDayAdder = 0
             for program in timeTable:
-                stopDayAdder = 0
-                startInDay = int(program.get("start").replace(":",""))*100
-                stopInDay = int(program.get("end").replace(":",""))*100
+                startTime = datetime.strptime(program.get("startTime").replace(":",""), '%Y-%m-%dT%H%M%S%z')
+                stopTime = datetime.strptime(program.get("endTime").replace(":",""), '%Y-%m-%dT%H%M%S%z')
 
-                if startInDay < lastStartInDay:
-                    startDayAdder = 1
+                if (lastStop != 0 and startTime < lastStop):
+                    startTime = lastStop
+                lastStop = stopTime
 
-                if stopInDay < startInDay:
-                    stopDayAdder = 1
-
-                startTime = now + timedelta(days=(advance + startDayAdder))
-                startDaySeconds = startTime.year * 10000000000 \
-                                  + startTime.month * 100000000 \
-                                  + startTime.day * 1000000
-                start = startDaySeconds + startInDay
-
-                stopTime = startTime + timedelta(days=stopDayAdder)
-                stopDaySeconds = stopTime.year * 10000000000 \
-                                  + stopTime.month * 100000000 \
-                                  + stopTime.day * 1000000
-                stop = stopDaySeconds + stopInDay
-
-                # VRT NU sometimes has overlapping programs, which mythtv can't handle.
-                if start < lastStop:
-                    start = lastStop
-                lastStop = stop
-
-                lastStartInDay = startInDay
-                xmlDoc.addProgramme(start,
-                                    stop,
+                xmlDoc.addProgramme(startTime.strftime('%Y%m%d%H%M%S %z').replace(':',''),
+                                    stopTime.strftime('%Y%m%d%H%M%S %z').replace(':',''),
                                     channel,
                                     program.get("title"))
         advance = advance + 1
